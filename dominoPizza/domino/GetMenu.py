@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
 from urllib import request as req
 from urllib import parse
+import re
 
+#-*- coding:utf-8 -*-
 from MenuList import Menu
 # 1. 데이타 가져오기
 
@@ -11,7 +13,7 @@ def getmenu():
     menu_list =[]
     #메뉴 리스트 page 반복문.
     for k in ['C0102','C0201','C0202','C0203']:
-
+    #for k in ['C0203']:
         print("=="*50)
         html = req.urlopen('https://web.dominos.co.kr/goods/list?dsp_ctgr={0}'.format(k))
 
@@ -30,7 +32,7 @@ def getmenu():
 
         # 메뉴가 피자가 아닌 경우,사이즈 구분없음
         else:
-            price = soup.select('.price_num')
+            price_Side = soup.select('.price_num')
 
         #print(btn_Url)
 
@@ -46,15 +48,20 @@ def getmenu():
             req.urlretrieve(img,imgName)
             # 피자인 경우, 사이즈별 가격정보를 list로.
             if k == 'C0102':
-                price_l=price_L[j].text
-                price_m = price_M[j].text
-                price = [price_l, price_m]
-                #print(title, img, price)
+                price_l=price_L[j].text.replace(',','')
+                price_m=price_M[j].text.replace(',','')
+                # price_l= re.sub('[-=.#/?:$}]', '', price_L[j].text)
+                # price_m =re.sub('[-=.#/?:$}]', '', price_M[j].text)
+
+                price = price_l[:-1] +'/'+price_m[:-1]
+
+                print(title, img, price)
 
 
             else:
-                price_side = price[j].text
-                #print(title, img, price_side)
+                price_side = price_Side[j].text.replace(',','')
+                price = int(price_side[:-1])
+                print(title, img, price)
 
 
 
@@ -81,8 +88,9 @@ def getmenu():
     return menu_list
 
 
-
+from DbConn import insertdata
 if __name__ == '__main__':
     menu_list = getmenu()
     for a in menu_list:
-        print(a.m_name)
+        #print(type(a))
+        insertdata('pythondb',a)
