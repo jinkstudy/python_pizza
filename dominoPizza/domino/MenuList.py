@@ -1,15 +1,13 @@
 class Menu:
-    def __init__(self,menu_name,menu_price,menu_desc,menu_cate,menu_img): #생성자 함수
-        self.menu_name = menu_name
-        self.menu_price = menu_price
-        self.menu_desc = menu_desc
-        self.menu_cate = menu_cate
-        self.menu_img = menu_img
+    def __init__(self,m_name,m_price,c_id,m_quantity,m_img,m_desc="none"): #생성자 함수
+        self.m_name = m_name
+        self.m_price = m_price
+        self.c_id = c_id
+        self.m_quantity = m_quantity
+        self.m_img = m_img
+        self.m_desc = m_desc
+        print('{0}정보를 추가 하였습니다.'.format(self.m_name))
 
 
-    def result(self):
-        print('{0}정보를 추가 하였습니다.'.format(self.menu_name))
 
-
-s=Menu("피자",3000,"맛있어요","피자","이미지")
 
