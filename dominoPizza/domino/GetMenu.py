@@ -13,7 +13,6 @@ def getmenu():
     menu_list =[]
     #메뉴 리스트 page 반복문.
     for k in ['C0102','C0201','C0202','C0203']:
-    #for k in ['C0203']:
         print("=="*50)
         html = req.urlopen('https://web.dominos.co.kr/goods/list?dsp_ctgr={0}'.format(k))
 
@@ -82,6 +81,7 @@ def getmenu():
 
 
             else:
+
                 menu = Menu(title, price, k, 30, imgName)
                 menu_list.append(menu)
 
@@ -93,4 +93,6 @@ if __name__ == '__main__':
     menu_list = getmenu()
     for a in menu_list:
         #print(type(a))
+
+        #
         insertdata('pythondb',a)

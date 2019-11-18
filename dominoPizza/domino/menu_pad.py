@@ -1,21 +1,14 @@
-# -------------------------------------------------------------------------------
-# Name:        module1
-# Purpose:
-#
-# Author:      Yongwook
-#
-# Created:     04-05-2016
-# Copyright:   (c) Yongwook 2016
-# Licence:     <your licence>
-# -------------------------------------------------------------------------------
-
+import csv
+import datetime
+import tkinter
 from tkinter import *
 from PIL import ImageTk
 from PIL import Image
 import matplotlib.pylab as plt
+from domino import payment_select
 
 root = Tk()
-root.geometry("1280x800+100+100")
+root.geometry("1280x800+10+10")
 
 flag = False
 
@@ -24,14 +17,17 @@ def hidden_button():
     global flag
     flag = True
 
-
-Label(root, text=u"도민석피자", background="seashell3", font=("Helvetica", 20)).place(x=170, y=20)
-Button(root, text=u"매출관리", command=lambda: sales_management()).place(x=1030, y=20)
+img = Image.open('./logo1.PNG')
+tkimage = ImageTk.PhotoImage(img)
+logo = Label(root, image=tkimage, borderwidth=0).place(x=20, y=5)
+#Label(root, text=u"통계자료").place(x=20, y=5) ********************* SIZE 조절
+Button(root, text=u"월별매출",bg='lightblue', command=lambda: payment_select.p_chart(), height='5', width='15').place(x=530, y=45)
+Button(root, text=u"지불방식",bg='lightblue', command=lambda: payment_select.p_pie(), height='5', width='15').place(x=660, y=45)
 
 # 피자, 사이드디시, 음료, 피클&소스 서브메뉴를 db에 가져와서 넣는다.
 
-from domino import DbConn
 
+from domino import DbConn
 category = ['C0102','C0201','C0202','C0203']
 
 sel_List=[]
@@ -76,9 +72,9 @@ class menu:
     def selected(self):
         temp = sel_menu.get(self.this_menu_name).get(self.var.get())[0]
         menu_1.destroy()
-        Label(root, text=u"선택된 메뉴 :                           ", background="seashell3").place(x=1000, y=70 + 170 * (
+        Label(root, text=u"선택된 메뉴 :                           ", background="seashell3").place(x=1000, y=170 + 170 * (
                     self.number - 1))
-        Label(root, text=u"선택된 메뉴 : " + temp, background="seashell3").place(x=1000, y=70 + 170 * (self.number - 1))
+        Label(root, text=u"선택된 메뉴 : " + temp, background="seashell3").place(x=1000, y=170 + 170 * (self.number - 1))
         global final_selected
         final_selected[self.number] = sel_menu.get(self.this_menu_name).get(self.var.get())  # 최종선택
 
@@ -117,21 +113,37 @@ def order():
     global flag
     ordering = Toplevel(root)
     cost = 0
+    receipt = []
+
     for i in final_selected:
+        menu_name1 = final_selected[i][0]
+        menu_price1 = final_selected[i][1]
+        menu_sel = [menu_name1, menu_price1]
+        receipt.append(menu_sel)
         cost += final_selected[i][1]
+        print(menu_name1, menu_price1)
+    receipt.append(cost)
+    now = datetime.datetime.now()
+    nowDatetime = now.strftime('%Y-%m-%d %H-%M-%S')
+    print(type(nowDatetime))  # 2015-04-19 12:11:32
+    f = open('./receipt/{0}.csv'.format(nowDatetime), 'wt', encoding='utf-8', newline='')
+    wr = csv.writer(f)
+    wr.writerow(receipt)
+    print(receipt)
+    f.close()
     for i in menu_name:
         Label(ordering, text=menu_name.get(i) + ':').grid(row=i, column=1)
         Label(ordering, text=final_selected.get(i)[0]).grid(row=i, column=3)
         Label(ordering, text=final_selected.get(i)[1]).grid(row=i, column=5)
+
     Label(ordering, text=u"계산하실 금액은 " + str(cost) + u"원 입니다.").grid(row=7, column=3)
     Button(ordering, text=u"결제", command=lambda: pop_sales(cost)).grid(row=7, column=5)
-
 
 # 결제
 def pop_sales(cost):
     sales = Toplevel()
     sales.title("결제")
-    sales.geometry("50x50")
+    sales.geometry("150x150+1000+20")
     Label(sales, text="결제되었습니다.").place(x=10, y=10)
 
 
@@ -139,12 +151,12 @@ def pop_sales(cost):
 mymenu = menu(root)
 
 # 4가지 주메뉴 버튼을 생성 후 make_menu() 호출
-Button(root, text=u"피자", command=lambda: make_menu(1)).place(x=10, y=70)
-Button(root, text=u"사이드디시", command=lambda: make_menu(2)).place(x=10, y=240)
-Button(root, text=u"음료", command=lambda: make_menu(3)).place(x=10, y=410)
-Button(root, text=u"피클&소스", command=lambda: make_menu(4)).place(x=10, y=580)
+Button(root, text=u"피자", command=lambda: make_menu(1), height='5', width='15').place(x=10, y=170)
+Button(root, text=u"사이드디시", command=lambda: make_menu(2), height='5', width='15').place(x=10, y=340)
+Button(root, text=u"음료", command=lambda: make_menu(3), height='5', width='15').place(x=10, y=510)
+Button(root, text=u"피클&소스", command=lambda: make_menu(4), height='5', width='15').place(x=10, y=680)
 
-Button(root, text=u"주문하기", command=order).place(x=1030, y=760)
+Button(root, text=u"주문하기", bg='lightgreen',font='Ariel 9 bold', command=order, height='5', width='15').place(x=800, y=45)
 
 # 주메뉴 이미지 붙이기
 images = [(1, "pizza.png"), (2, "side_dish.png"), (3, "beverage.png"), (4, "pickle&sauce.png")]
@@ -153,11 +165,11 @@ for i, image in images:
     this_image = ImageTk.PhotoImage(img)
     mylabel = Label(image=this_image)
     mylabel.image = this_image
-    mylabel.place(x=100, y=70 + (i - 1) * 170)
+    mylabel.place(x=150, y=140 + (i - 1) * 170)
 
 v = StringVar()
 
-root.config(width=600, height=800, background="seashell3")
+root.config(width=600, height=800, background="white")
 
-root.title(u"도민석피자")
+root.title(u"Dominsok's")
 root.mainloop()
